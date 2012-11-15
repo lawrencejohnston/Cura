@@ -30,10 +30,14 @@ class simpleModeWindow(configBase.configWindowBase):
 		
 		menubar = wx.MenuBar()
 		fileMenu = wx.Menu()
-		i = fileMenu.Append(-1, 'Load model file...')
+		i = fileMenu.Append(-1, 'Load model file...\tCTRL+L')
 		self.Bind(wx.EVT_MENU, self.OnLoadModel, i)
+		i = fileMenu.Append(-1, 'Prepare print...\tCTRL+R')
+		self.Bind(wx.EVT_MENU, self.OnSlice, i)
+		i = fileMenu.Append(-1, 'Print...\tCTRL+P')
+		self.Bind(wx.EVT_MENU, self.OnPrint, i)
 		fileMenu.AppendSeparator()
-		i = fileMenu.Append(-1, 'Preferences...')
+		i = fileMenu.Append(-1, 'Preferences...\tCTRL+,')
 		self.Bind(wx.EVT_MENU, self.OnPreferences, i)
 		fileMenu.AppendSeparator()
 		i = fileMenu.Append(wx.ID_EXIT, 'Quit')
@@ -70,7 +74,7 @@ class simpleModeWindow(configBase.configWindowBase):
 		self.printTypeHigh = wx.RadioButton(printTypePanel, -1, 'High quality print')
 		self.printTypeJoris = wx.RadioButton(printTypePanel, -1, 'Thin walled cup or vase')
 
-                printMaterialPanel = wx.Panel(configPanel)
+		printMaterialPanel = wx.Panel(configPanel)
 		self.printMaterialPLA = wx.RadioButton(printMaterialPanel, -1, 'PLA', style=wx.RB_GROUP)
 		self.printMaterialABS = wx.RadioButton(printMaterialPanel, -1, 'ABS')
 		self.printMaterialDiameter = wx.TextCtrl(printMaterialPanel, -1, profile.getProfileSetting('filament_diameter'))
@@ -106,9 +110,9 @@ class simpleModeWindow(configBase.configWindowBase):
 		sizer.Add(boxsizer, (2,0), flag=wx.EXPAND)
 
 		# load and slice buttons.
-		loadButton = wx.Button(self, -1, 'Load Model')
-		sliceButton = wx.Button(self, -1, 'Prepare print')
-		printButton = wx.Button(self, -1, 'Print')
+		loadButton = wx.Button(self, -1, '&Load Model')
+		sliceButton = wx.Button(self, -1, 'P&repare print')
+		printButton = wx.Button(self, -1, '&Print')
 		self.Bind(wx.EVT_BUTTON, self.OnLoadModel, loadButton)
 		self.Bind(wx.EVT_BUTTON, self.OnSlice, sliceButton)
 		self.Bind(wx.EVT_BUTTON, self.OnPrint, printButton)

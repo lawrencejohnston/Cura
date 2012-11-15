@@ -1,13 +1,14 @@
 from __future__ import absolute_import
 import __init__
 
-import wx, os, platform, types, webbrowser
+import wx, os, platform, types, webbrowser, shutil, glob
 
 from gui import configBase
 from gui import expertConfig
 from gui import preview3d
 from gui import sliceProgessPanel
 from gui import alterationPanel
+from gui import pluginPanel
 from gui import preferencesDialog
 from gui import configWizard
 from gui import firmwareInstall
@@ -24,9 +25,21 @@ from util import version
 from util import sliceRun
 from util import meshLoader
 
-def main():
+def main(splash):
 	#app = wx.App(False)
 	if profile.getPreference('machine_type') == 'unknown':
+		if platform.system() == "Darwin":
+			#Check if we need to copy our examples
+			exampleFile = os.path.expanduser('~/CuraExamples/UltimakerRobot_support.stl')
+			if not os.path.isfile(exampleFile):
+				try:
+					os.makedirs(os.path.dirname(exampleFile))
+				except:
+					pass
+				for filename in glob.glob(os.path.normpath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..', 'example', '*.*'))):
+					shutil.copy(filename, os.path.join(os.path.dirname(exampleFile), os.path.basename(filename)))
+				profile.putPreference('lastFile', exampleFile)
+		splash.Show(False)
 		configWizard.configWizard()
 	if profile.getPreference('startMode') == 'Simple':
 		simpleMode.simpleModeWindow()
@@ -48,8 +61,13 @@ class mainWindow(configBase.configWindowBase):
 		
 		menubar = wx.MenuBar()
 		fileMenu = wx.Menu()
-		i = fileMenu.Append(-1, 'Load model file...')
+		i = fileMenu.Append(-1, 'Load model file...\tCTRL+L')
 		self.Bind(wx.EVT_MENU, lambda e: self._showModelLoadDialog(1), i)
+		i = fileMenu.Append(-1, 'Prepare print...\tCTRL+R')
+		self.Bind(wx.EVT_MENU, self.OnSlice, i)
+		i = fileMenu.Append(-1, 'Print...\tCTRL+P')
+		self.Bind(wx.EVT_MENU, self.OnPrint, i)
+
 		fileMenu.AppendSeparator()
 		i = fileMenu.Append(-1, 'Open Profile...')
 		self.Bind(wx.EVT_MENU, self.OnLoadProfile, i)
@@ -61,7 +79,7 @@ class mainWindow(configBase.configWindowBase):
 		i = fileMenu.Append(-1, 'Reset Profile to default')
 		self.Bind(wx.EVT_MENU, self.OnResetProfile, i)
 		fileMenu.AppendSeparator()
-		i = fileMenu.Append(-1, 'Preferences...')
+		i = fileMenu.Append(-1, 'Preferences...\tCTRL+,')
 		self.Bind(wx.EVT_MENU, self.OnPreferences, i)
 		fileMenu.AppendSeparator()
 		i = fileMenu.Append(wx.ID_EXIT, 'Quit')
@@ -207,13 +225,21 @@ class mainWindow(configBase.configWindowBase):
 		validators.warningAbove(c, lambda : (float(profile.getProfileSetting('nozzle_size')) * 3.0 / 4.0), "A bottom layer of more then %.2fmm (3/4 nozzle size) usually give bad results and is not recommended.")
 		c = configBase.SettingRow(right, "Enable 'skin'", 'enable_skin', False, 'Skin prints the outer lines of the prints twice, each time with half the thickness. This gives the illusion of a higher print quality.')
 
+		#Plugin page
+		self.pluginPanel = pluginPanel.pluginPanel(nb)
+		if len(self.pluginPanel.pluginList) > 0:
+			nb.AddPage(self.pluginPanel, "Plugins")
+		else:
+			self.pluginPanel.Show(False)
+
+		#Alteration page
 		self.alterationPanel = alterationPanel.alterationPanel(nb)
 		nb.AddPage(self.alterationPanel, "Start/End-GCode")
 
 		# load and slice buttons.
-		loadButton = wx.Button(self, -1, 'Load Model')
-		sliceButton = wx.Button(self, -1, 'Prepare print')
-		printButton = wx.Button(self, -1, 'Print')
+		loadButton = wx.Button(self, -1, '&Load Model')
+		sliceButton = wx.Button(self, -1, 'P&repare print')
+		printButton = wx.Button(self, -1, '&Print')
 		self.Bind(wx.EVT_BUTTON, lambda e: self._showModelLoadDialog(1), loadButton)
 		self.Bind(wx.EVT_BUTTON, self.OnSlice, sliceButton)
 		self.Bind(wx.EVT_BUTTON, self.OnPrint, printButton)
@@ -255,7 +281,7 @@ class mainWindow(configBase.configWindowBase):
 		self.updateProfileToControls()
 
 		self.SetBackgroundColour(nb.GetBackgroundColour())
-
+		
 		self.Fit()
 		if wx.Display().GetClientArea().GetWidth() < self.GetSize().GetWidth():
 			f = self.GetSize().GetWidth() - wx.Display().GetClientArea().GetWidth()
@@ -454,3 +480,4 @@ class mainWindow(configBase.configWindowBase):
 		super(mainWindow, self).updateProfileToControls()
 		self.preview3d.updateProfileToControls()
 		self.alterationPanel.updateProfileToControls()
+		self.pluginPanel.updateProfileToControls()

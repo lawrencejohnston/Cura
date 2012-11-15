@@ -1,9 +1,10 @@
 from __future__ import absolute_import
 import __init__
 
-import wx, sys, os, shutil, math, threading, subprocess, time, re
+import wx, sys, os, shutil, math, threading, subprocess, time, re, platform
 
 from gui import taskbar
+from gui import preferencesDialog
 from util import profile
 from util import sliceRun
 from util import exporer
@@ -72,12 +73,37 @@ class sliceProgessPanel(wx.Panel):
 		exporer.openExporer(sliceRun.getExportFilename(self.filelist[0]))
 	
 	def OnCopyToSD(self, e):
+		if profile.getPreference('sdpath') == '':
+			wx.MessageBox("You need to configure your SD card drive first before you can copy files to it.\nOpening the preferences now.", 'No SD card drive.', wx.OK | wx.ICON_INFORMATION)
+			prefDialog = preferencesDialog.preferencesDialog(self.GetParent())
+			prefDialog.Centre()
+			prefDialog.Show(True)
+			if profile.getPreference('sdpath') == '':
+				print "No path set"
+				return
 		exportFilename = sliceRun.getExportFilename(self.filelist[0])
 		filename = os.path.basename(exportFilename)
 		if profile.getPreference('sdshortnames') == 'True':
 			filename = sliceRun.getShortFilename(filename)
-		shutil.copy(exportFilename, os.path.join(profile.getPreference('sdpath'), filename))
+		try:
+			shutil.copy(exportFilename, os.path.join(profile.getPreference('sdpath'), filename))
+		except:
+			self.GetParent().preview3d.ShowWarningPopup("Failed to copy file to SD card.")
+			return
+		self.GetParent().preview3d.ShowWarningPopup("Copy finished, safely remove SD card?", self.OnSafeRemove)
 	
+	def OnSafeRemove(self):
+		if platform.system() == "Windows":
+			cmd = "%s %s>NUL" % (os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'EjectMedia.exe')), profile.getPreference('sdpath'))
+		elif platform.system() == "Darwin":
+			cmd = "diskutil eject '%s' > /dev/null 2>&1" % (profile.getPreference('sdpath'))
+		else:
+			cmd = "umount '%s' > /dev/null 2>&1" % (profile.getPreference('sdpath'))
+		if os.system(cmd):
+			self.GetParent().preview3d.ShowWarningPopup("Safe remove failed.")
+		else:
+			self.GetParent().preview3d.ShowWarningPopup("You can now eject the card.")
+
 	def OnSliceDone(self, result):
 		self.progressGauge.Destroy()
 		self.abortButton.Destroy()
@@ -98,8 +124,8 @@ class sliceProgessPanel(wx.Panel):
 				self.openFileLocationButton = wx.Button(self, -1, "Open file location")
 				self.Bind(wx.EVT_BUTTON, self.OnOpenFileLocation, self.openFileLocationButton)
 				self.sizer.Add(self.openFileLocationButton, 0)
-			if profile.getPreference('sdpath') != '':
-				self.copyToSDButton = wx.Button(self, -1, "To SDCard")
+			if len(profile.getSDcardDrives()) > 0:
+				self.copyToSDButton = wx.Button(self, -1, "Copy to SDCard")
 				self.Bind(wx.EVT_BUTTON, self.OnCopyToSD, self.copyToSDButton)
 				self.sizer.Add(self.copyToSDButton, 0)
 			self.showButton = wx.Button(self, -1, "Show result")
@@ -168,6 +194,10 @@ class WorkerThread(threading.Thread):
 				if logLine.startswith('Model error('):
 					gcodefile.write(';%s\n' % (logLine))
 			gcodefile.close()
+			wx.CallAfter(self.notifyWindow.statusText.SetLabel, "Running plugins")
+			ret = profile.runPostProcessingPlugins(gcodeFilename)
+			if ret != None:
+				self.progressLog.append(ret)
 			self.gcode = gcodeInterpreter.gcode()
 			self.gcode.load(gcodeFilename)
 			profile.replaceGCodeTags(gcodeFilename, self.gcode)

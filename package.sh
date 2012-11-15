@@ -16,7 +16,7 @@ BUILD_TARGET=${1:-all}
 ##Do we need to create the final archive
 ARCHIVE_FOR_DISTRIBUTION=1
 ##Which version name are we appending to the final archive
-BUILD_NAME=12.10
+BUILD_NAME=12.11
 TARGET_DIR=Cura-${BUILD_NAME}-${BUILD_TARGET}
 
 ##Which versions of external programs to use
@@ -97,6 +97,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	downloadURL http://videocapture.sourceforge.net/VideoCapture-0.9-5.zip
 	downloadURL http://ffmpeg.zeranoe.com/builds/win32/static/ffmpeg-20120927-git-13f0cd6-win32-static.7z
 	downloadURL http://sourceforge.net/projects/comtypes/files/comtypes/0.6.2/comtypes-0.6.2.win32.exe
+	downloadURL http://www.uwe-sieber.de/files/ejectmedia.zip
 	#Get pypy
 	downloadURL https://bitbucket.org/pypy/pypy/downloads/pypy-${PYPY_VERSION}-win32.zip
 elif [ $BUILD_TARGET = "osx64" ]; then
@@ -129,6 +130,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	extract ffmpeg-20120927-git-13f0cd6-win32-static.7z ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe
 	extract ffmpeg-20120927-git-13f0cd6-win32-static.7z ffmpeg-20120927-git-13f0cd6-win32-static/licenses
 	extract comtypes-0.6.2.win32.exe
+	extract ejectmedia.zip Win32
 	
 	mkdir -p ${TARGET_DIR}/python
 	mkdir -p ${TARGET_DIR}/Cura/
@@ -141,6 +143,7 @@ if [ $BUILD_TARGET = "win32" ]; then
 	mv VideoCapture-0.9-5/Python27/DLLs/vidcap.pyd ${TARGET_DIR}/python/DLLs
 	mv ffmpeg-20120927-git-13f0cd6-win32-static/bin/ffmpeg.exe ${TARGET_DIR}/Cura/
 	mv ffmpeg-20120927-git-13f0cd6-win32-static/licenses ${TARGET_DIR}/Cura/ffmpeg-licenses/
+	mv Win32/EjectMedia.exe ${TARGET_DIR}/Cura/
 	rm -rf \$_OUTDIR
 	rm -rf PURELIB
 	rm -rf PLATLIB
@@ -209,7 +212,8 @@ if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
 		echo "Building osx app"
 		mkdir -p scripts/osx64/Cura.app/Contents/Resources
 		mkdir -p scripts/osx64/Cura.app/Contents/Pkgs
-		rm -rf scripts/osx64/Cura.app/Contents/Resources/*
+		rm -rf scripts/osx64/Cura.app/Contents/Resources/Cura
+		rm -rf scripts/osx64/Cura.app/Contents/Resources/pypy
 		cp -a ${TARGET_DIR}/* scripts/osx64/Cura.app/Contents/Resources
 		cp python-2.7.3-macosx10.6.dmg scripts/osx64/Cura.app/Contents/Pkgs
 		cp numpy-1.6.2-py2.7-python.org-macosx10.3.dmg scripts/osx64/Cura.app/Contents/Pkgs
@@ -218,6 +222,14 @@ if (( ${ARCHIVE_FOR_DISTRIBUTION} )); then
 		cp wxPython2.9-osx-2.9.4.0-cocoa-py2.7.dmg scripts/osx64/Cura.app/Contents/Pkgs
 		cd scripts/osx64
 		$TAR cfp - Cura.app | gzip --best -c > ../../${TARGET_DIR}.tar.gz
+		hdiutil detach /Volumes/Cura\ -\ Ultimaker/
+		rm -rf Cura.dmg.sparseimage
+		hdiutil convert DmgTemplateCompressed.dmg -format UDSP -o Cura.dmg
+		hdiutil resize -size 500m Cura.dmg.sparseimage
+		hdiutil attach Cura.dmg.sparseimage
+		cp -a Cura.app /Volumes/Cura\ -\ Ultimaker/Cura/
+		hdiutil detach /Volumes/Cura\ -\ Ultimaker
+		hdiutil convert Cura.dmg.sparseimage -format UDZO -imagekey zlib-level=9 -ov -o ../../${TARGET_DIR}.dmg
 	else
 		echo "Archiving to ${TARGET_DIR}.tar.gz"
 		$TAR cfp - ${TARGET_DIR} | gzip --best -c > ${TARGET_DIR}.tar.gz
