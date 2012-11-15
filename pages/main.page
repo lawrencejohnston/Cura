@@ -1,0 +1,120 @@
+=About - What is Cura?=
+Cura is a project which aims to be an single software solution for 3D printing. While it is developed to be used with the [http://www.ultimaker.com/ Ultimaker 3D printer], it can be used with other [http://wiki.reprap.org RapRap] based designs.
+
+* Cura helps you to setup an [http://www.ultimaker.com/ Ultimaker]
+* Cura shows your 3D model, allows for scaling/positioning
+* Cura can slice the model to 3D GCode, with sane editable configuration settings
+* Cura can send this GCode to the 3D printer for printing
+* And more...
+
+=Download=
+* [http://software.ultimaker.com/current/Cura_12.11.exe Windows] (Requires Windows XP or newer)
+* [http://software.ultimaker.com/current/Cura-12.11-osx64.dmg Mac OS X] (Intel based Mac)
+* [http://software.ultimaker.com/current/linux-Cura-12.10.tar.gz Linux]
+
+=Manual=
+# [[Quickprint]]
+# [[Google Sketchup]]
+# [[Model inspection]]
+# [[Normal mode]]
+# [[Project planner]]
+
+=Screenshot=
+[[Image:cura.png]]
+
+=Issues=
+If you have an issue with Cura, please check [https://github.com/daid/Cura/issues Cura's github issue tracker]. Someone might have already reported the problem. Else report the problem.
+You can also file feature requests into the issue tracker.
+
+=Is Cura good?=
+You do not have to take my word for it. Other people are liking it:
+
+* [http://forum.ultimaker.com/viewtopic.php?p=4210#p4210 I have no links to cura software, but I suggest you use it, once you have done a few prints, you will not look back. Good luck]
+* [http://forum.ultimaker.com/viewtopic.php?p=4145#p4145 Et bien merci pour les conseils, après avoir un peu galéré pour mettre Cura, c'est que du bonheur et ca marche nickel!]
+* [http://forum.ultimaker.com/viewtopic.php?p=3982#p3982 I think CURA is great and reliable every time]
+* [http://forum.ultimaker.com/viewtopic.php?p=3968#p3968 sliced with cura (standard parameters) = very good]
+* [http://forum.ultimaker.com/viewtopic.php?p=3873#p3873 I fixed this by switching to Cura and have Cura update the ultimaker to Marlin. Works perfectly now]
+* In fact I've used nothing but Cura and haven't even touched Netfabb or RepG, I cant see any reason to. (received in email)
+* [http://flashgamer.com/arduino/comments/adding-a-heated-build-platform-to-your-ultimaker Speaking of Daid - if you're not using his Cura software for your Ultimaker - you're missing out Big Time. To me it's been the difference between a good purchase and a bad one!]
+* [http://forum.ultimaker.com/viewtopic.php?p=6309#p6309 Never mind. I changed to Cura and suddenly all my problems are solved! My third print is almost perfect!]
+
+=Status - How is Cura progressing=
+===Current release (12.08) features===
+
+* Up to 4x faster slicing then Skeinforge
+* Easy to use GUI, with human understandable values.
+* 3D model preview before slicing
+* Running multiple slice actions in parallel
+* Transparent 3D view
+* GCode path preview
+* [[Joris]] addon
+* [[X-Ray-vision]]
+* Firmware update tool for [http://www.ultimaker.com/ Ultimaker] machines
+* Rotate/Flip 3D model for printing
+* First run configuration wizard
+* Cool minimal feedrate (so cool never makes your print crawl)
+* Show errors from slicing in 3D model (identify faulty edges)
+* Printing interface intigrated with Cura
+* Simple mode, just select a profile, a material type, a model, and hit "print". So "Everyone Can Print (TM)"
+* Skin option
+* Thicker bottom layer option
+* Improved retraction (only retract when comb couldn't avoid holes)
+* More rotate options (swap XZ, YZ)
+* Option to save the used profile when slicing, so you know which settings where used with the slice
+* More statistics about print when using the Cura print interface (filament used, filament weight, filament costs)
+* Scale to fit machine button
+* Open in exporer button
+* Multi-extruder slicing
+* GCode syntax highlight in start/end gcode editor
+* [[Project planner]]
+* Cut up a "plate" STL file into multiple parts for the project planner.
+* Use project planner to assemble plates, save plates as 1 STL file.
+* Better retraction visualisation in GCode preview
+* Better "retraction only on jump" support
+* Arduino Mega 2560 Rev3 driver included for windows
+* Option to reset profile to default in normal mode.
+* Drop stl files into the window to load them
+* Min/Max fan speed support, effected by slowdown due to cooling
+* Auto baudrate detection
+* Batch run tool
+* M0/M1 pause support
+* Realtime speed controls in printer interface
+* Fixed critcal bug with none ascii filenames under windows
+* Changed comb to move a greater distance inside the model, so combing doesn't scar the outer surface
+* Added terminal interface to print window
+* Newer start/end code
+* More tags to be used in the start/end code to save information in your GCode file
+* Removal of the log file (it's no longer needed)
+* Option to load a profile from a sliced GCode file
+
+===Known bugs===
+* RC2: First run wizard does not work correctly. Controlling the Ultimaker fails. (Fixed in RC3)
+* RC2: First layer does not contain enough support material if support is enabled. (Fixed in RC3)
+* RC3: Crashes on first slice if you never touched the start/end GCode. (Fixed in RC4)
+* RC4: Slicing of files with accents or Russian characters in the filename or path fails. (Fixed in 12.07)
+* 12.08: Project planner "all at once" feature causes the nozzle to dive into the print when finished (Fixed in 12.10)
+
+=Running the development version=
+For instructions check out: [https://github.com/daid/Cura/wiki/Installing-development-version Installing development version]
+
+=History=
+
+Origonally Cura was named SkeinPyPy. This name came from the software package [http://skeinforge.com/ Skeinforge] in combination with [http://pypy.org/ PyPy]. Skeinforge is a "slicer" which turns a 3D model into machine instructions. However, Skeinforge is quite slow and can take well over a hour to slice complex models.
+Skeinforge is made in Python, and there is a project called [http://pypy.org/ PyPy] which is a faster Python implementation. Combining the two made "SkeinforgePyPy" which I later renamed to "SkeinPyPy".
+
+Originally SkeinPyPy was just a package combining Skeinforge with PyPy and a few patches to make it easier to use. The package was made so it was ready to run and didn't require you to install anything else. It was also packaged with [http://reprap.org/wiki/Printrun PrintRun] which handles the machine communication. These where the '''Alpha''' versions.
+
+But it still was Skeinforge. The Skeinforge user-interface, with 260 configuration options, is a bit difficult to use. Many of the options don't apply to 3D printing. And configuration changes where not easy. Also, sharing configuration was not made easy.
+
+So, the '''NewUI''' project was started. With input from many people, a new, easy to use, user-interface was created. Still using Skeinforge as backend, but without showing any of the Skeinforge horrible user-interface screens. And SkeinPyPy started to evolve from a "make Skeinforge faster" to "make a all in one, easy to use, 3D printing software package". These packages are the '''Beta''' versions.
+
+It was decided to rename the package from SkeinPyPy to Cura. Because it surpassed the "Skeinforge with PyPy" goal. The Cura name was choosen within the Ultimaker community.
+
+Finally in October 2012, [http://www.ultimaker.com/ Ultimaker] hired me to put more work into Cura and do other 3D printing related software projects. Cura will remain Free, OpenSource and it will support RepRap machines next to Ultimaker machines. However, it will receive some Ultimaker branding so it can be the offical package for Ultimakers.
+
+=Show your support=
+
+The best way to support Cura is to report [https://github.com/daid/Cura/issues issues] this way Cura can become even better. Report problems, as well as ideas for new features or improvements.
+
+People have also asked me if they can show support by donating money. You can make donations trough PayPal to the email address daid303@gmail.com (transfer money as gift), however, this is just to show your appreciation. It will not entitle you for any direct support, or will buy you features you want.
+Another way to indirectly support Cura development is by buying printers, parts and filament from [https://shop.ultimaker.com/ Ultimaker webshop]
